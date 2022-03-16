@@ -1,0 +1,8 @@
+{
+	fn[main];
+	$main[] = {
+		var[text];
+		set[$text "Hello world"];
+		out[$text];
+	};
+}
