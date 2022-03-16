@@ -7,16 +7,19 @@
 #include "builder/linker.cpp"
 using namespace std;
 
-string readfile(string name){
+string readfile(string name)
+{
 	string content;
 	char ch;
 	ifstream src(name);
 
-	if (!src.is_open()) {
+	if (!src.is_open())
+	{
 		return NULL;
 	}
 
-	while (src.get(ch)) {
+	while (src.get(ch))
+	{
 		content.push_back(ch);
 	}
 
@@ -25,26 +28,35 @@ string readfile(string name){
 	return content;
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
 	string srccode = readfile(argv[1]);
 	vector<node> divcode;
 	node tree;
 
-	try{
+	try
+	{
 		divcode = divide(srccode);
-		for(int i = 0;i < divcode.size();i++){
+		for (int i = 0; i < divcode.size(); i++)
+		{
 			cout << divcode[i].type << "\t" << divcode[i].self << endl;
 		}
-	}catch(exception& e){
+	}
+	catch (exception &e)
+	{
 		cout << e.what();
 	}
 
-	cout << endl << endl;
+	cout << endl
+		 << endl;
 
-	try{
+	try
+	{
 		tree = link(divcode);
 		cout << tree.self << endl;
-	}catch(exception& e){
+	}
+	catch (exception &e)
+	{
 		cout << e.what();
 	}
 

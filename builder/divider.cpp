@@ -2,7 +2,8 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
-vector<node> divide(string src){
+vector<node> divide(string src)
+{
 	vector<node> divcode;
 	node current;
 
@@ -18,111 +19,149 @@ vector<node> divide(string src){
 	int line = 1;
 	int ch = 1;
 
-	for(int i = 0;i < src.size();i++){
-		char c = (char) src[i];
+	for (int i = 0; i < src.size(); i++)
+	{
+		char c = (char)src[i];
 
 		// for error detection during division
-		if(c == '\n'){
+		if (c == '\n')
+		{
 			line++;
 			ch = 1;
-		}else{
-			ch ++;
+		}
+		else
+		{
+			ch++;
 		}
 
-		if(inquote){ // dividing while in string
-			if(escape){ // escaping - next character is always escaped
+		if (inquote)
+		{ // dividing while in string
+			if (escape)
+			{ // escaping - next character is always escaped
 				current.self.push_back(c);
 				escape = false;
-			}else{ // not escaping - check for end of string and escape
-				if(c == '\"'){
+			}
+			else
+			{ // not escaping - check for end of string and escape
+				if (c == '\"')
+				{
 					inquote = false;
 					divcode.push_back(current);
 					current.self = "";
 					current.type = "";
-				}else{
-					if(c == '\\'){
+				}
+				else
+				{
+					if (c == '\\')
+					{
 						escape = true;
 					}
 					current.self.push_back(c);
 				}
 			}
-		}else if (incomment){ // dividing while in comment
-			if(c == '>'){
+		}
+		else if (incomment)
+		{ // dividing while in comment
+			if (c == '>')
+			{
 				incomment = false;
 			}
-		}else{ // dividing outside
-			if(terminators.find(c) != string::npos){ // on terminator
+		}
+		else
+		{ // dividing outside
+			if (terminators.find(c) != string::npos)
+			{ // on terminator
 				// terminate old node if exists
-				if(current.self != ""){
+				if (current.self != "")
+				{
 					divcode.push_back(current);
 					current.self = "";
 					current.type = "";
 				}
-				if(specials.find(c) != string::npos){ // on special
+				if (specials.find(c) != string::npos)
+				{ // on special
 					// assign node types
-					switch(c){
-						case '(':
+					switch (c)
+					{
+					case '(':
 						current.type = "groupo";
 						break;
-						case ')':
+					case ')':
 						current.type = "groupc";
 						break;
-						case '[':
+					case '[':
 						current.type = "serieso";
 						break;
-						case ']':
+					case ']':
 						current.type = "seriesc";
 						break;
-						case '{':
+					case '{':
 						current.type = "blocko";
 						break;
-						case '}':
+					case '}':
 						current.type = "blockc";
 						break;
-						case ',':
+					case ',':
 						current.type = "iteme";
 						break;
-						case ';':
+					case ';':
 						current.type = "linee";
 						break;
-						case '$':
+					case '$':
 						current.type = "value";
 						break;
-						case '<':
+					case '<':
 						incomment = true;
 						break;
-						case '\"':
+					case '\"':
 						inquote = true;
 						current.type = "str";
 						break;
 					}
 
 					// some specials are entire nodes
-					if(((string)"()[]{},;$").find(c) != string::npos){
+					if (((string) "()[]{},;$").find(c) != string::npos)
+					{
 						current.self.push_back(c);
 						divcode.push_back(current);
 						current.self = "";
-					current.type = "";
+						current.type = "";
 					}
 				}
-			}else{ // not terminator, so part of token name
-				if(current.type == ""){ // unknown type, guess with first character
-					if(numbers.find(c) != string::npos){
+			}
+			else
+			{ // not terminator, so part of token name
+				if (current.type == "")
+				{ // unknown type, guess with first character
+					if (numbers.find(c) != string::npos)
+					{
 						current.type = "num";
-					}else{
+					}
+					else
+					{
 						current.type = "token";
 					}
 					current.self.push_back(c);
-				}else{ // known type, make sure number is valid
-					if(current.type == "num"){
-						if(count(current.self.begin(),current.self.end(), '.') > 1){
-							throw runtime_error("invalid number at "+to_string(line)+":"+to_string(ch)+":\n"+current.self);
-						}else if(current.self[0] == '.'){
-							throw runtime_error("invalid number at "+to_string(line)+":"+to_string(ch)+":\n"+current.self);
-						}else{
+				}
+				else
+				{ // known type, make sure number is valid
+					if (current.type == "num")
+					{
+						if (count(current.self.begin(), current.self.end(), '.') > 1)
+						{
+							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.self);
+						}
+						else if (current.self[0] == '.')
+						{
+							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.self);
+						}
+						else
+						{
 							current.self.push_back(c);
 						}
-					}else{
+					}
+					else
+					{
 						current.self.push_back(c);
 					}
 				}
