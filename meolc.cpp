@@ -2,9 +2,11 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include "builder/token.h"
 #include "builder/node.h"
 #include "builder/divider.cpp"
 #include "builder/linker.cpp"
+
 using namespace std;
 
 string readfile(string name)
@@ -28,32 +30,40 @@ string readfile(string name)
 	return content;
 }
 
+void printrecursive(node tree, int count){
+	string value = "";
+	if(!tree.value.empty()){
+		value = tree.value;
+	}
+	string tabs(count, '\t');
+	cout << tabs << tree.type << "\t" << tree.value << endl;
+	for(int i = 0;i < tree.children.size();i++){
+		printrecursive(tree.children[i], count+1);
+	}
+}
+void printtree(node tree){
+	printrecursive(tree, 0);
+}
+
 int main(int argc, char *argv[])
 {
 	string srccode = readfile(argv[1]);
-	vector<node> divcode;
+	vector<token> divcode;
 	node tree;
 
 	try
 	{
 		divcode = divide(srccode);
-		for (int i = 0; i < divcode.size(); i++)
-		{
-			cout << divcode[i].type << "\t" << divcode[i].self << endl;
-		}
 	}
 	catch (exception &e)
 	{
 		cout << e.what();
 	}
 
-	cout << endl
-		 << endl;
-
 	try
 	{
 		tree = link(divcode);
-		cout << tree.self << endl;
+		printtree(tree);
 	}
 	catch (exception &e)
 	{

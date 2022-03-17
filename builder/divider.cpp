@@ -1,15 +1,18 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include "token.h"
+
 using namespace std;
-vector<node> divide(string src)
+
+vector<token> divide(string src)
 {
-	vector<node> divcode;
-	node current;
+	vector<token> divcode;
+	token current;
 
 	string numbers = ".01234566789";
 	string whitespaces = " \t\n\r";
-	string specials = "()[]{},;$<\"";
+	string specials = "()[]{};$<\"";
 	string terminators = whitespaces + specials;
 
 	// tools for dividing
@@ -38,7 +41,7 @@ vector<node> divide(string src)
 		{ // dividing while in string
 			if (escape)
 			{ // escaping - next character is always escaped
-				current.self.push_back(c);
+				current.value.push_back(c);
 				escape = false;
 			}
 			else
@@ -47,7 +50,7 @@ vector<node> divide(string src)
 				{
 					inquote = false;
 					divcode.push_back(current);
-					current.self = "";
+					current.value = "";
 					current.type = "";
 				}
 				else
@@ -56,7 +59,7 @@ vector<node> divide(string src)
 					{
 						escape = true;
 					}
-					current.self.push_back(c);
+					current.value.push_back(c);
 				}
 			}
 		}
@@ -71,16 +74,16 @@ vector<node> divide(string src)
 		{ // dividing outside
 			if (terminators.find(c) != string::npos)
 			{ // on terminator
-				// terminate old node if exists
-				if (current.self != "")
+				// terminate old token if exists
+				if (current.value != "")
 				{
 					divcode.push_back(current);
-					current.self = "";
+					current.value = "";
 					current.type = "";
 				}
 				if (specials.find(c) != string::npos)
 				{ // on special
-					// assign node types
+					// assign token types
 					switch (c)
 					{
 					case '(':
@@ -101,9 +104,6 @@ vector<node> divide(string src)
 					case '}':
 						current.type = "blockc";
 						break;
-					case ',':
-						current.type = "iteme";
-						break;
 					case ';':
 						current.type = "linee";
 						break;
@@ -119,12 +119,12 @@ vector<node> divide(string src)
 						break;
 					}
 
-					// some specials are entire nodes
-					if (((string) "()[]{},;$").find(c) != string::npos)
+					// some specials are entire tokens
+					if (((string) "()[]{};$").find(c) != string::npos)
 					{
-						current.self.push_back(c);
+						current.value.push_back(c);
 						divcode.push_back(current);
-						current.self = "";
+						current.value = "";
 						current.type = "";
 					}
 				}
@@ -139,30 +139,30 @@ vector<node> divide(string src)
 					}
 					else
 					{
-						current.type = "token";
+						current.type = "symbol";
 					}
-					current.self.push_back(c);
+					current.value.push_back(c);
 				}
 				else
 				{ // known type, make sure number is valid
 					if (current.type == "num")
 					{
-						if (count(current.self.begin(), current.self.end(), '.') > 1)
+						if (count(current.value.begin(), current.value.end(), '.') > 1)
 						{
-							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.self);
+							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.value);
 						}
-						else if (current.self[0] == '.')
+						else if (current.value[0] == '.')
 						{
-							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.self);
+							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.value);
 						}
 						else
 						{
-							current.self.push_back(c);
+							current.value.push_back(c);
 						}
 					}
 					else
 					{
-						current.self.push_back(c);
+						current.value.push_back(c);
 					}
 				}
 			}
