@@ -12,7 +12,6 @@ class Node
 {
 public:
 	NodeType type;
-
 	vector<Node> children;
 	string str;
 	char sym;

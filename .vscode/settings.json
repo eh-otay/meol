@@ -50,6 +50,7 @@
         "stack": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "iosfwd": "cpp"
     }
 }

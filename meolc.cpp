@@ -30,10 +30,41 @@ string readfile(string name)
 	return content;
 }
 
-void printrecursive(Node tree, int count){
-}
-void printtree(Node tree){
-	printrecursive(tree, 0);
+void printtokens(vector<Token> tokens){
+	for(int i = 0;i < tokens.size();i++){
+		switch(tokens[i].type){
+			case groupo:
+			cout << "groupo" << endl;
+			break;
+			case serieso:
+			cout << "serieso" << endl;
+			break;
+			case blocko:
+			cout << "blocko" << endl;
+			break;
+			case groupc:
+			cout << "groupc" << endl;
+			break;
+			case seriesc:
+			cout << "seriesc" << endl;
+			break;
+			case blockc:
+			cout << "blockc" << endl;
+			break;
+			case str:
+			cout << "str\t" << tokens[i].str << endl;
+			break;
+			case sym:
+			cout << "sym\t" << tokens[i].sym << endl;
+			break;
+			case num:
+			cout << "num\t" << tokens[i].num << endl;
+			break;
+			case name:
+			cout << "name\t" << tokens[i].name << endl;
+			break;
+		}
+	}
 }
 
 int main(int argc, char *argv[])
@@ -47,25 +78,26 @@ int main(int argc, char *argv[])
 	try
 	{
 		tokens = divide(srccode);
+		cout << tokens.size() << endl;
+		printtokens(tokens);
 	}
 	catch (exception &e)
 	{
-		cout << e.what();
+		cout << "error " << e.what() << endl;
 	}
 	cout << "done" << endl;
 
-	cout << "linking" << endl;
-	Node tree;
-	try
-	{
-		tree = link(tokens);
-		printtree(tree);
-	}
-	catch (exception &e)
-	{
-		cout << e.what();
-	}
-	cout << "done" << endl;
+	// cout << "linking" << endl;
+	// Node tree;
+	// try
+	// {
+	// 	tree = link(tokens);
+	// }
+	// catch (exception &e)
+	// {
+	// 	cout << e.what();
+	// }
+	// cout << "done" << endl;
 
 	return 0;
 }

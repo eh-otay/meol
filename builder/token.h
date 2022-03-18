@@ -7,7 +7,7 @@
 
 using namespace std;
 
-enum TokenType {groupo, groupc, serieso, seriesc, blocko, blockc, str, sym, num, name};
+enum TokenType {groupo, serieso, blocko, groupc, seriesc, blockc, str, sym, num, name};
 
 class Token
 {

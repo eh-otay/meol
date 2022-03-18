@@ -17,6 +17,12 @@ Node fillgroup(vector<Token> &tokens, Node root);
 Node fillseries(vector<Token> &tokens, Node root);
 Node fillblock(vector<Token> &tokens, Node root);
 
+void printtokentypes(vector<Token> &tokens){
+	for(int i = 0;i < tokens.size();i++){
+		cout << tokens[i].type;
+	}
+	cout << endl;
+}
 Node group(vector<Token> &tokens)
 {
 	Node root;
@@ -163,6 +169,7 @@ Node fillblock(vector<Token> &tokens, Node root)
 	while (tokens.size() != 0)
 	{
 		Token current = tokens.back();
+		printtokentypes(tokens);
 		Node child;
 		switch (current.type)
 		{
@@ -277,5 +284,6 @@ Node link(vector<Token> &tokens)
 	reverse(tokens.begin(), tokens.end());
 
 	Node root;
+	root.type = blocknode;
 	return fillblock(tokens, root);
 }

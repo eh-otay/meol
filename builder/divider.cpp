@@ -7,8 +7,7 @@
 using namespace std;
 
 vector<Token> div(string &src);
-Token divname(string &src);
-Token divnum(string &src) throw (runtime_error);
+Token divnamenum(string &src) throw (runtime_error);
 void divcmt(string &src);
 Token divsym(char c);
 Token divstr(string &src);
@@ -87,22 +86,7 @@ vector<Token> div(string &src)
 		{
 			if (whitespaces.find(c) == string::npos)
 			{
-				if (numbers.find(c) != string::npos)
-				{
-					try
-					{
-						tokens.push_back(divnum(src));
-					}
-					catch (runtime_error e)
-					{
-						cout << e.what() << endl;
-						break;
-					}
-				}
-				else
-				{
-					tokens.push_back(divname(src));
-				}
+				tokens.push_back(divnamenum(src));
 			}else{
 				src.pop_back();
 			}
@@ -110,47 +94,38 @@ vector<Token> div(string &src)
 	}
 	return tokens;
 }
-Token divname(string &src)
-{
-	string whitespaces = " \t\n\r";
-	string structures = "()[]{}";
-	string symbols = ";<\"+-*/%=$";
-	string terminators = whitespaces + structures + symbols;
-	Token token;
-	token.type = name;
-	while (terminators.find(src.back()) == string::npos)
-	{
-		token.name.push_back(src.back());
-		src.pop_back();
-	}
-	return token;
-}
-Token divnum(string &src) throw (runtime_error)
-{
+Token divnamenum(string &src) throw (runtime_error){
+	// characters
 	string numbers = ".01234566789";
 	string whitespaces = " \t\n\r";
 	string structures = "()[]{}";
 	string symbols = ";<\"+-*/%=$";
 	string terminators = whitespaces + structures + symbols;
-	string number;
-	while (src.size() != 0)
+
+	// tool for type
+	bool notnumber = false;
+
+	Token token;
+	string val;
+	while (terminators.find(src.back()) == string::npos)
 	{
-		char c = src.back();
-		if (numbers.find(c) != string::npos)
-		{
-			number.push_back(c);
-			src.pop_back();
+		if(numbers.find(src.back()) == string::npos){
+			notnumber = true;
 		}
-		else if (terminators.find(c) != string::npos)
-		{
-			Token token;
-			token.type = num;
-			token.num = stod(number);
-			return token;
-		}
-		else
-		{
+		val.push_back(src.back());
+		src.pop_back();
+	}
+	if(numbers.find(val[0]) == string::npos){
+		token.type = name;
+		token.name = val;
+		return token;
+	}else{
+		if(notnumber){
 			throw runtime_error("invalid number");
+		}else{
+			token.type = num;
+			token.num = stod(val);
+			return token;
 		}
 	}
 }
@@ -167,7 +142,6 @@ void divcmt(string &src)
 }
 Token divsym(char c)
 {
-	cout << c << endl;
 	Token token;
 	token.type = sym;
 	token.sym = c;
