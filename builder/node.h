@@ -1,4 +1,3 @@
-
 #ifndef NODE_H
 #define NODE_H
 
@@ -7,11 +6,18 @@
 
 using namespace std;
 
-struct node
+enum NodeType{groupnode, seriesnode, blocknode, linenode, strnode, symnode, numnode, namenode};
+
+class Node
 {
-	string value;
-	string type;
-	vector<node> children;
+public:
+	NodeType type;
+
+	vector<Node> children;
+	string str;
+	char sym;
+	double num;
+	string name;
 };
 
 #endif

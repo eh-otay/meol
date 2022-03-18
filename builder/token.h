@@ -7,10 +7,16 @@
 
 using namespace std;
 
-struct token
+enum TokenType {groupo, groupc, serieso, seriesc, blocko, blockc, str, sym, num, name};
+
+class Token
 {
-	string value;
-	string type; // groupo groupc serieso seriesc blocko blockc symbol num str value linee
+	public:
+	TokenType type;
+	string str;
+	char sym;
+	double num;
+	string name;
 };
 
 #endif

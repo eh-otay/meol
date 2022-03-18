@@ -7,136 +7,207 @@
 
 using namespace std;
 
-node group(vector<token> &tokens);
-node series(vector<token> &tokens);
-node block(vector<token> &tokens);
-node line(vector<token> &tokens);
-node symbol(vector<token> &tokens);
-node fillcode(vector<token> &tokens, node root);
-node filldata(vector<token> &tokens, node root, string stopper);
+Node group(vector<Token> &tokens);
+Node series(vector<Token> &tokens);
+Node block(vector<Token> &tokens);
+Node line(vector<Token> &tokens);
+Node other(vector<Token> &tokens);
+Node fillline(vector<Token> &tokens, Node root);
+Node fillgroup(vector<Token> &tokens, Node root);
+Node fillseries(vector<Token> &tokens, Node root);
+Node fillblock(vector<Token> &tokens, Node root);
 
-node group(vector<token> &tokens)
+Node group(vector<Token> &tokens)
 {
-	node root;
-	root.type = "group";
-	return filldata(tokens, root, "groupc");
+	Node root;
+	root.type = groupnode;
+	return fillgroup(tokens, root);
 }
-node series(vector<token> &tokens)
+Node series(vector<Token> &tokens)
 {
-	node root;
-	root.type = "series";
-	return filldata(tokens, root, "seriesc");
+	Node root;
+	root.type = seriesnode;
+	return fillseries(tokens, root);
 }
-node block(vector<token> &tokens)
+Node block(vector<Token> &tokens)
 {
-	node root;
-	root.type = "block";
-	return fillcode(tokens, root);
+	Node root;
+	root.type = blocknode;
+	return fillblock(tokens, root);
 }
-node line(vector<token> &tokens)
+Node line(vector<Token> &tokens)
 {
-	node root;
-	root.type = "line";
-	return filldata(tokens, root, "linee");
+	Node root;
+	root.type = linenode;
+	return fillline(tokens, root);
 }
-node symbol(vector<token> &tokens)
+Node other(vector<Token> &tokens)
 {
-	node root;
-	root.type = tokens.back().type;
-	root.value = tokens.back().value;
+	Node root;
+	switch (tokens.back().type)
+	{
+	case str:
+		root.type = strnode;
+		root.str = tokens.back().str;
+		break;
+	case sym:
+		root.type = symnode;
+		root.sym = tokens.back().sym;
+		break;
+	case num:
+		root.type = numnode;
+		root.num = tokens.back().num;
+		break;
+	case name:
+		root.type = namenode;
+		root.name = tokens.back().name;
+		break;
+	}
 	tokens.pop_back();
 	return root;
 }
-node fillcode(vector<token> &tokens, node root)
+Node fillline(vector<Token> &tokens, Node root)
+{
+
+	while (tokens.size() != 0)
+	{
+		Token current = tokens.back();
+		Node child;
+		bool linee = false;
+		switch (current.type)
+		{
+		case groupo:
+			tokens.pop_back();
+			child = group(tokens);
+			break;
+		case serieso:
+			tokens.pop_back();
+			child = series(tokens);
+			break;
+		case blocko:
+			tokens.pop_back();
+			child = block(tokens);
+			break;
+		case sym:
+			if (current.sym == ';')
+			{
+				return root;
+			}
+		default:
+			child = other(tokens);
+		}
+		root.children.push_back(child);
+	}
+}
+Node fillgroup(vector<Token> &tokens, Node root)
 {
 	while (tokens.size() != 0)
 	{
-		token current = tokens.back();
-		node child;
-		if (current.type == "groupo")
+		Token current = tokens.back();
+		Node child;
+		switch (current.type)
 		{
+		case groupo:
 			tokens.pop_back();
 			child = group(tokens);
-		}
-		else if (current.type == "serieso")
-		{
+			break;
+		case serieso:
 			tokens.pop_back();
 			child = series(tokens);
-		}
-		else if (current.type == "blocko")
-		{
+			break;
+		case blocko:
 			tokens.pop_back();
 			child = block(tokens);
-		}
-		else if (current.type == "blockc")
-		{
-			tokens.pop_back();
 			break;
+		case groupc:
+			return root;
+			break;
+		default:
+			child = other(tokens);
 		}
-		else
+		root.children.push_back(child);
+	}
+}
+Node fillseries(vector<Token> &tokens, Node root)
+{
+	while (tokens.size() != 0)
+	{
+		Token current = tokens.back();
+		Node child;
+		switch (current.type)
 		{
+		case groupo:
+			tokens.pop_back();
+			child = group(tokens);
+			break;
+		case serieso:
+			tokens.pop_back();
+			child = series(tokens);
+			break;
+		case blocko:
+			tokens.pop_back();
+			child = block(tokens);
+			break;
+		case seriesc:
+			return root;
+			break;
+		default:
+			child = other(tokens);
+		}
+		root.children.push_back(child);
+	}
+	return root;
+}
+Node fillblock(vector<Token> &tokens, Node root)
+{
+	while (tokens.size() != 0)
+	{
+		Token current = tokens.back();
+		Node child;
+		switch (current.type)
+		{
+		case groupo:
+			tokens.pop_back();
+			child = group(tokens);
+			break;
+		case serieso:
+			tokens.pop_back();
+			child = series(tokens);
+			break;
+		case blocko:
+			tokens.pop_back();
+			child = block(tokens);
+			break;
+		case blockc:
+			return root;
+			break;
+		default:
 			child = line(tokens);
 		}
 		root.children.push_back(child);
 	}
 	return root;
 }
-node filldata(vector<token> &tokens, node root, string stopper)
-{
-	while (tokens.size() != 0)
-	{
-		token current = tokens.back();
-		node child;
-		if (current.type == "groupo")
-		{
-			tokens.pop_back();
-			child = group(tokens);
-		}
-		else if (current.type == "serieso")
-		{
-			tokens.pop_back();
-			child = series(tokens);
-		}
-		else if (current.type == "blocko")
-		{
-			tokens.pop_back();
-			child = block(tokens);
-		}
-		else if (current.type == stopper)
-		{
-			tokens.pop_back();
-			break;
-		}
-		else
-		{
-			child = symbol(tokens);
-		}
-		root.children.push_back(child);
-	}
-	return root;
-}
 
-node link(vector<token> &tokens)
+Node link(vector<Token> &tokens)
 {
 	// check if brackets are valid
 	bool good = true;
 	vector<int> brackets;
 	for (int i = 0; i < tokens.size(); i++)
 	{
-		if (tokens[i].type == "groupo")
+		switch (tokens[i].type)
 		{
+		case groupo:
 			brackets.push_back(1);
-		}
-		if (tokens[i].type == "serieso")
-		{
+			break;
+		case serieso:
 			brackets.push_back(2);
-		}
-		if (tokens[i].type == "blocko")
-		{
+			break;
+		case blocko:
 			brackets.push_back(3);
-		}
-		if (tokens[i].type == "groupc")
-		{
+			break;
+		case groupc:
 			if (brackets.size() != 0)
 			{
 				if (brackets.back() == 1)
@@ -145,16 +216,15 @@ node link(vector<token> &tokens)
 				}
 				else
 				{
-					good = true;
+					good = false;
 				}
 			}
 			else
 			{
-				good = true;
+				good = false;
 			}
-		}
-		if (tokens[i].type == "seriesc")
-		{
+			break;
+		case seriesc:
 			if (brackets.size() != 0)
 			{
 				if (brackets.back() == 2)
@@ -163,16 +233,15 @@ node link(vector<token> &tokens)
 				}
 				else
 				{
-					good = true;
+					good = false;
 				}
 			}
 			else
 			{
-				good = true;
+				good = false;
 			}
-		}
-		if (tokens[i].type == "blockc")
-		{
+			break;
+		case blockc:
 			if (brackets.size() != 0)
 			{
 				if (brackets.back() == 3)
@@ -181,13 +250,14 @@ node link(vector<token> &tokens)
 				}
 				else
 				{
-					good = true;
+					good = false;
 				}
 			}
 			else
 			{
-				good = true;
+				good = false;
 			}
+			break;
 		}
 		if (!good)
 		{
@@ -206,7 +276,6 @@ node link(vector<token> &tokens)
 	// reverse tokens to be able to pop seen tokens
 	reverse(tokens.begin(), tokens.end());
 
-	node root;
-	root.type = "root";
-	return fillcode(tokens, root);
+	Node root;
+	return fillblock(tokens, root);
 }

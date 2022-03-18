@@ -30,45 +30,42 @@ string readfile(string name)
 	return content;
 }
 
-void printrecursive(node tree, int count){
-	string value = "";
-	if(!tree.value.empty()){
-		value = tree.value;
-	}
-	string tabs(count, '\t');
-	cout << tabs << tree.type << "\t" << tree.value << endl;
-	for(int i = 0;i < tree.children.size();i++){
-		printrecursive(tree.children[i], count+1);
-	}
+void printrecursive(Node tree, int count){
 }
-void printtree(node tree){
+void printtree(Node tree){
 	printrecursive(tree, 0);
 }
 
 int main(int argc, char *argv[])
 {
+	cout << "reading" << endl;
 	string srccode = readfile(argv[1]);
-	vector<token> divcode;
-	node tree;
+	cout << "done" << endl;
 
+	cout << "dividing" << endl;
+	vector<Token> tokens;
 	try
 	{
-		divcode = divide(srccode);
+		tokens = divide(srccode);
 	}
 	catch (exception &e)
 	{
 		cout << e.what();
 	}
+	cout << "done" << endl;
 
+	cout << "linking" << endl;
+	Node tree;
 	try
 	{
-		tree = link(divcode);
+		tree = link(tokens);
 		printtree(tree);
 	}
 	catch (exception &e)
 	{
 		cout << e.what();
 	}
+	cout << "done" << endl;
 
 	return 0;
 }

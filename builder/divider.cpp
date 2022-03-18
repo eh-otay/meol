@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -5,168 +6,222 @@
 
 using namespace std;
 
-vector<token> divide(string src)
+vector<Token> div(string &src);
+Token divname(string &src);
+Token divnum(string &src) throw (runtime_error);
+void divcmt(string &src);
+Token divsym(char c);
+Token divstr(string &src);
+vector<Token> divide(string src);
+
+vector<Token> div(string &src)
 {
-	vector<token> divcode;
-	token current;
+	string numbers = ".01234566789";
+	string whitespaces = " \t\n\r";
+	string structures = "()[]{}#\"";
+	string symbols = ";+-*/%=$";
+	string terminators = whitespaces + structures + symbols;
+
+	vector<Token> tokens;
+	while (src.size() != 0)
+	{
+		char c = src.back();
+		if (c == '(')
+		{
+			src.pop_back();
+			Token token;
+			token.type = groupo;
+			tokens.push_back(token);
+		}
+		else if (c == '[')
+		{
+			src.pop_back();
+			Token token;
+			token.type = serieso;
+			tokens.push_back(token);
+		}
+		else if (c == '{')
+		{
+			src.pop_back();
+			Token token;
+			token.type = blocko;
+			tokens.push_back(token);
+		}
+		else if (c == ')')
+		{
+			src.pop_back();
+			Token token;
+			token.type = groupc;
+			tokens.push_back(token);
+		}
+		else if (c == ']')
+		{
+			src.pop_back();
+			Token token;
+			token.type = seriesc;
+			tokens.push_back(token);
+		}
+		else if (c == '}')
+		{
+			src.pop_back();
+			Token token;
+			token.type = blockc;
+			tokens.push_back(token);
+		}
+		else if (c == '#')
+		{
+			src.pop_back();
+			divcmt(src);
+		}
+		else if (c == '\"')
+		{
+			src.pop_back();
+			tokens.push_back(divstr(src));
+		}
+		else if (symbols.find(c) != string::npos)
+		{
+			src.pop_back();
+			tokens.push_back(divsym(c));
+		}
+		else
+		{
+			if (whitespaces.find(c) == string::npos)
+			{
+				if (numbers.find(c) != string::npos)
+				{
+					try
+					{
+						tokens.push_back(divnum(src));
+					}
+					catch (runtime_error e)
+					{
+						cout << e.what() << endl;
+						break;
+					}
+				}
+				else
+				{
+					tokens.push_back(divname(src));
+				}
+			}else{
+				src.pop_back();
+			}
+		}
+	}
+	return tokens;
+}
+Token divname(string &src)
+{
+	string whitespaces = " \t\n\r";
+	string structures = "()[]{}";
+	string symbols = ";<\"+-*/%=$";
+	string terminators = whitespaces + structures + symbols;
+	Token token;
+	token.type = name;
+	while (terminators.find(src.back()) == string::npos)
+	{
+		token.name.push_back(src.back());
+		src.pop_back();
+	}
+	return token;
+}
+Token divnum(string &src) throw (runtime_error)
+{
+	string numbers = ".01234566789";
+	string whitespaces = " \t\n\r";
+	string structures = "()[]{}";
+	string symbols = ";<\"+-*/%=$";
+	string terminators = whitespaces + structures + symbols;
+	string number;
+	while (src.size() != 0)
+	{
+		char c = src.back();
+		if (numbers.find(c) != string::npos)
+		{
+			number.push_back(c);
+			src.pop_back();
+		}
+		else if (terminators.find(c) != string::npos)
+		{
+			Token token;
+			token.type = num;
+			token.num = stod(number);
+			return token;
+		}
+		else
+		{
+			throw runtime_error("invalid number");
+		}
+	}
+}
+void divcmt(string &src)
+{
+	while (src.size() != 0)
+	{
+		src.pop_back();
+		if (src.back() == '\n')
+		{
+			break;
+		}
+	}
+}
+Token divsym(char c)
+{
+	cout << c << endl;
+	Token token;
+	token.type = sym;
+	token.sym = c;
+	return token;
+}
+Token divstr(string &src)
+{
+	Token token;
+	token.type = str;
+	bool escape = false;
+	while (src.size() != 0)
+	{
+		char c = src.back();
+		if (escape)
+		{ // escaping - next character is always escaped
+			token.str.push_back(c);
+			src.pop_back();
+			escape = false;
+		}
+		else
+		{ // not escaping - check for end of string and escape
+			if (c == '\"')
+			{
+				return token;
+			}
+			else
+			{
+				if (c == '\\')
+				{
+					escape = true;
+				}
+				token.str.push_back(c);
+				src.pop_back();
+			}
+		}
+	}
+}
+vector<Token> divide(string src)
+{
+	vector<Token> tokens;
+	Token current;
 
 	string numbers = ".01234566789";
 	string whitespaces = " \t\n\r";
-	string specials = "()[]{};$<\"";
-	string terminators = whitespaces + specials;
+	string structures = "()[]{};<\"+-*/%=$";
+	string terminators = whitespaces + structures;
 
 	// tools for dividing
 	bool inquote = false;
 	bool incomment = false;
 	bool escape = false;
-	int line = 1;
-	int ch = 1;
 
-	for (int i = 0; i < src.size(); i++)
-	{
-		char c = (char)src[i];
+	// reverse to pop back
+	reverse(src.begin(), src.end());
 
-		// for error detection during division
-		if (c == '\n')
-		{
-			line++;
-			ch = 1;
-		}
-		else
-		{
-			ch++;
-		}
-
-		if (inquote)
-		{ // dividing while in string
-			if (escape)
-			{ // escaping - next character is always escaped
-				current.value.push_back(c);
-				escape = false;
-			}
-			else
-			{ // not escaping - check for end of string and escape
-				if (c == '\"')
-				{
-					inquote = false;
-					divcode.push_back(current);
-					current.value = "";
-					current.type = "";
-				}
-				else
-				{
-					if (c == '\\')
-					{
-						escape = true;
-					}
-					current.value.push_back(c);
-				}
-			}
-		}
-		else if (incomment)
-		{ // dividing while in comment
-			if (c == '>')
-			{
-				incomment = false;
-			}
-		}
-		else
-		{ // dividing outside
-			if (terminators.find(c) != string::npos)
-			{ // on terminator
-				// terminate old token if exists
-				if (current.value != "")
-				{
-					divcode.push_back(current);
-					current.value = "";
-					current.type = "";
-				}
-				if (specials.find(c) != string::npos)
-				{ // on special
-					// assign token types
-					switch (c)
-					{
-					case '(':
-						current.type = "groupo";
-						break;
-					case ')':
-						current.type = "groupc";
-						break;
-					case '[':
-						current.type = "serieso";
-						break;
-					case ']':
-						current.type = "seriesc";
-						break;
-					case '{':
-						current.type = "blocko";
-						break;
-					case '}':
-						current.type = "blockc";
-						break;
-					case ';':
-						current.type = "linee";
-						break;
-					case '$':
-						current.type = "value";
-						break;
-					case '<':
-						incomment = true;
-						break;
-					case '\"':
-						inquote = true;
-						current.type = "str";
-						break;
-					}
-
-					// some specials are entire tokens
-					if (((string) "()[]{};$").find(c) != string::npos)
-					{
-						current.value.push_back(c);
-						divcode.push_back(current);
-						current.value = "";
-						current.type = "";
-					}
-				}
-			}
-			else
-			{ // not terminator, so part of token name
-				if (current.type == "")
-				{ // unknown type, guess with first character
-					if (numbers.find(c) != string::npos)
-					{
-						current.type = "num";
-					}
-					else
-					{
-						current.type = "symbol";
-					}
-					current.value.push_back(c);
-				}
-				else
-				{ // known type, make sure number is valid
-					if (current.type == "num")
-					{
-						if (count(current.value.begin(), current.value.end(), '.') > 1)
-						{
-							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.value);
-						}
-						else if (current.value[0] == '.')
-						{
-							throw runtime_error("invalid number at " + to_string(line) + ":" + to_string(ch) + ":\n" + current.value);
-						}
-						else
-						{
-							current.value.push_back(c);
-						}
-					}
-					else
-					{
-						current.value.push_back(c);
-					}
-				}
-			}
-		}
-	}
-	return divcode;
+	return div(src);
 }
