@@ -6,7 +6,7 @@
 
 using namespace std;
 
-enum NodeType{groupnode, seriesnode, blocknode, linenode, strnode, symnode, numnode, namenode};
+enum NodeType{groupnode, seriesnode, blocknode, exprnode, strnode, symnode, numnode, namenode};
 
 class Node
 {

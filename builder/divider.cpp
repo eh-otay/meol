@@ -6,21 +6,21 @@
 
 using namespace std;
 
-vector<Token> div(string &src);
-Token divnamenum(string &src) throw (runtime_error);
+vector<Token> div(string &src) throw(runtime_error);
+Token divnamenum(string &src) throw(runtime_error);
 void divcmt(string &src);
 Token divsym(char c);
 Token divstr(string &src);
 vector<Token> divide(string src);
 
-vector<Token> div(string &src)
-{
-	string numbers = ".01234566789";
-	string whitespaces = " \t\n\r";
-	string structures = "()[]{}#\"";
-	string symbols = ";+-*/%=$";
-	string terminators = whitespaces + structures + symbols;
+string numbers = ".01234566789";
+string whitespaces = " \t\n\r";
+string structures = "()[]{}#\"";
+string symbols = ",+-*/%&|!^><=$";
+string terminators = whitespaces + structures + symbols;
 
+vector<Token> div(string &src) throw(runtime_error)
+{
 	vector<Token> tokens;
 	while (src.size() != 0)
 	{
@@ -86,22 +86,25 @@ vector<Token> div(string &src)
 		{
 			if (whitespaces.find(c) == string::npos)
 			{
-				tokens.push_back(divnamenum(src));
-			}else{
+				try
+				{
+					tokens.push_back(divnamenum(src));
+				}
+				catch (runtime_error &e)
+				{
+					throw e;
+				}
+			}
+			else
+			{
 				src.pop_back();
 			}
 		}
 	}
 	return tokens;
 }
-Token divnamenum(string &src) throw (runtime_error){
-	// characters
-	string numbers = ".01234566789";
-	string whitespaces = " \t\n\r";
-	string structures = "()[]{}";
-	string symbols = ";<\"+-*/%=$";
-	string terminators = whitespaces + structures + symbols;
-
+Token divnamenum(string &src) throw(runtime_error)
+{
 	// tool for type
 	bool notnumber = false;
 
@@ -109,20 +112,27 @@ Token divnamenum(string &src) throw (runtime_error){
 	string val;
 	while (terminators.find(src.back()) == string::npos)
 	{
-		if(numbers.find(src.back()) == string::npos){
+		if (numbers.find(src.back()) == string::npos)
+		{
 			notnumber = true;
 		}
 		val.push_back(src.back());
 		src.pop_back();
 	}
-	if(numbers.find(val[0]) == string::npos){
+	if (numbers.find(val[0]) == string::npos)
+	{
 		token.type = name;
 		token.name = val;
 		return token;
-	}else{
-		if(notnumber){
+	}
+	else
+	{
+		if (notnumber)
+		{
 			throw runtime_error("invalid number");
-		}else{
+		}
+		else
+		{
 			token.type = num;
 			token.num = stod(val);
 			return token;
@@ -183,11 +193,6 @@ vector<Token> divide(string src)
 {
 	vector<Token> tokens;
 	Token current;
-
-	string numbers = ".01234566789";
-	string whitespaces = " \t\n\r";
-	string structures = "()[]{};<\"+-*/%=$";
-	string terminators = whitespaces + structures;
 
 	// tools for dividing
 	bool inquote = false;

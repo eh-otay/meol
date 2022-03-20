@@ -10,18 +10,67 @@ using namespace std;
 Node group(vector<Token> &tokens);
 Node series(vector<Token> &tokens);
 Node block(vector<Token> &tokens);
-Node line(vector<Token> &tokens);
+Node expr(vector<Token> &tokens);
 Node other(vector<Token> &tokens);
-Node fillline(vector<Token> &tokens, Node root);
+Node fillexpr(vector<Token> &tokens, Node root);
 Node fillgroup(vector<Token> &tokens, Node root);
 Node fillseries(vector<Token> &tokens, Node root);
 Node fillblock(vector<Token> &tokens, Node root);
 
-void printtokentypes(vector<Token> &tokens){
-	for(int i = 0;i < tokens.size();i++){
-		cout << tokens[i].type;
+void debugprinttokens(vector<Token> tokens)
+{
+	for (int i = 0; i < tokens.size(); i++)
+	{
+		switch (tokens[i].type)
+		{
+		case groupo:
+			cout << "groupo";
+			break;
+		case serieso:
+			cout << "serieso";
+			break;
+		case blocko:
+			cout << "blocko";
+			break;
+		case groupc:
+			cout << "groupc";
+			break;
+		case seriesc:
+			cout << "seriesc";
+			break;
+		case blockc:
+			cout << "blockc";
+			break;
+		case str:
+			cout << "str" << tokens[i].str;
+			break;
+		case sym:
+			cout << "sym" << tokens[i].sym;
+			break;
+		case num:
+			cout << "num" << tokens[i].num;
+			break;
+		case name:
+			cout << "name" << tokens[i].name;
+			break;
+		}
+		cout << " ";
 	}
-	cout << endl;
+	cout << endl << endl;
+}
+void debugprintlasttoken(vector<Token> tokens){
+	cout << tokens.back().type << endl;
+}
+void debugprintnodes(vector<Node> nodes)
+{
+	for (int i = 0; i < nodes.size(); i++)
+	{
+		cout << nodes[i].type;
+	}
+	cout << endl << endl;
+}
+void debugprintlastnode(vector<Node> nodes){
+	cout << "size " << nodes.size() << endl;
 }
 Node group(vector<Token> &tokens)
 {
@@ -41,11 +90,12 @@ Node block(vector<Token> &tokens)
 	root.type = blocknode;
 	return fillblock(tokens, root);
 }
-Node line(vector<Token> &tokens)
+Node expr(vector<Token> &tokens)
 {
 	Node root;
-	root.type = linenode;
-	return fillline(tokens, root);
+	root.type = exprnode;
+	root = fillexpr(tokens, root);
+	return root;
 }
 Node other(vector<Token> &tokens)
 {
@@ -72,14 +122,12 @@ Node other(vector<Token> &tokens)
 	tokens.pop_back();
 	return root;
 }
-Node fillline(vector<Token> &tokens, Node root)
+Node fillexpr(vector<Token> &tokens, Node root)
 {
-
 	while (tokens.size() != 0)
 	{
 		Token current = tokens.back();
 		Node child;
-		bool linee = false;
 		switch (current.type)
 		{
 		case groupo:
@@ -94,9 +142,15 @@ Node fillline(vector<Token> &tokens, Node root)
 			tokens.pop_back();
 			child = block(tokens);
 			break;
+		case groupc:
+		case seriesc:
+		case blockc:
+			return root;
+			break;
 		case sym:
-			if (current.sym == ';')
+			if (current.sym == ',')
 			{
+				tokens.pop_back();
 				return root;
 			}
 		default:
@@ -104,6 +158,7 @@ Node fillline(vector<Token> &tokens, Node root)
 		}
 		root.children.push_back(child);
 	}
+	return root;
 }
 Node fillgroup(vector<Token> &tokens, Node root)
 {
@@ -126,10 +181,11 @@ Node fillgroup(vector<Token> &tokens, Node root)
 			child = block(tokens);
 			break;
 		case groupc:
+			tokens.pop_back();
 			return root;
 			break;
 		default:
-			child = other(tokens);
+			child = expr(tokens);
 		}
 		root.children.push_back(child);
 	}
@@ -155,10 +211,11 @@ Node fillseries(vector<Token> &tokens, Node root)
 			child = block(tokens);
 			break;
 		case seriesc:
+			tokens.pop_back();
 			return root;
 			break;
 		default:
-			child = other(tokens);
+			child = expr(tokens);
 		}
 		root.children.push_back(child);
 	}
@@ -169,7 +226,6 @@ Node fillblock(vector<Token> &tokens, Node root)
 	while (tokens.size() != 0)
 	{
 		Token current = tokens.back();
-		printtokentypes(tokens);
 		Node child;
 		switch (current.type)
 		{
@@ -186,10 +242,11 @@ Node fillblock(vector<Token> &tokens, Node root)
 			child = block(tokens);
 			break;
 		case blockc:
+			tokens.pop_back();
 			return root;
 			break;
 		default:
-			child = line(tokens);
+			child = expr(tokens);
 		}
 		root.children.push_back(child);
 	}

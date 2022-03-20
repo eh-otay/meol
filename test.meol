@@ -1,0 +1,4 @@
+fn(main),
+set($main($text),{
+	$out($text)
+})
