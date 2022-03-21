@@ -25,66 +25,54 @@ vector<Token> div(string &src) throw(runtime_error)
 	while (src.size() != 0)
 	{
 		char c = src.back();
-		if (c == '(')
+		Token token;
+		switch (c)
 		{
+		case '(':
 			src.pop_back();
-			Token token;
 			token.type = groupo;
 			tokens.push_back(token);
-		}
-		else if (c == '[')
-		{
+			break;
+		case '[':
 			src.pop_back();
-			Token token;
 			token.type = serieso;
 			tokens.push_back(token);
-		}
-		else if (c == '{')
-		{
+			break;
+		case '{':
 			src.pop_back();
-			Token token;
 			token.type = blocko;
 			tokens.push_back(token);
-		}
-		else if (c == ')')
-		{
+			break;
+		case ')':
 			src.pop_back();
-			Token token;
 			token.type = groupc;
 			tokens.push_back(token);
-		}
-		else if (c == ']')
-		{
+			break;
+		case ']':
 			src.pop_back();
-			Token token;
 			token.type = seriesc;
 			tokens.push_back(token);
-		}
-		else if (c == '}')
-		{
+			break;
+		case '}':
 			src.pop_back();
-			Token token;
 			token.type = blockc;
 			tokens.push_back(token);
-		}
-		else if (c == '#')
-		{
+			break;
+		case '#':
 			src.pop_back();
 			divcmt(src);
-		}
-		else if (c == '\"')
-		{
+			break;
+		case '\"':
 			src.pop_back();
 			tokens.push_back(divstr(src));
-		}
-		else if (symbols.find(c) != string::npos)
-		{
-			src.pop_back();
-			tokens.push_back(divsym(c));
-		}
-		else
-		{
-			if (whitespaces.find(c) == string::npos)
+			break;
+		default:
+			if (symbols.find(c) != string::npos)
+			{
+				src.pop_back();
+				tokens.push_back(divsym(c));
+			}
+			else if (whitespaces.find(c) == string::npos)
 			{
 				try
 				{

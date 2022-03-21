@@ -56,9 +56,11 @@ void debugprinttokens(vector<Token> tokens)
 		}
 		cout << " ";
 	}
-	cout << endl << endl;
+	cout << endl
+		 << endl;
 }
-void debugprintlasttoken(vector<Token> tokens){
+void debugprintlasttoken(vector<Token> tokens)
+{
 	cout << tokens.back().type << endl;
 }
 void debugprintnodes(vector<Node> nodes)
@@ -67,9 +69,11 @@ void debugprintnodes(vector<Node> nodes)
 	{
 		cout << nodes[i].type;
 	}
-	cout << endl << endl;
+	cout << endl
+		 << endl;
 }
-void debugprintlastnode(vector<Node> nodes){
+void debugprintlastnode(vector<Node> nodes)
+{
 	cout << "size " << nodes.size() << endl;
 }
 Node group(vector<Token> &tokens)

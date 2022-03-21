@@ -69,43 +69,49 @@ void printtokens(vector<Token> tokens)
 		}
 	}
 }
-void printtree(Node root, int count){
+void printtree(Node root, int count)
+{
 	string tabs(count, '\t');
-	switch(root.type){
-		case groupnode:
+	switch (root.type)
+	{
+	case groupnode:
 		cout << tabs << "group\t" << endl;
-		for(int i = 0;i < root.children.size();i++){
+		for (int i = 0; i < root.children.size(); i++)
+		{
 			printtree(root.children[i], count + 1);
 		}
 		break;
-		case seriesnode:
+	case seriesnode:
 		cout << tabs << "series\t" << endl;
-		for(int i = 0;i < root.children.size();i++){
+		for (int i = 0; i < root.children.size(); i++)
+		{
 			printtree(root.children[i], count + 1);
 		}
 		break;
-		case blocknode:
+	case blocknode:
 		cout << tabs << "block\t" << endl;
-		for(int i = 0;i < root.children.size();i++){
+		for (int i = 0; i < root.children.size(); i++)
+		{
 			printtree(root.children[i], count + 1);
 		}
 		break;
-		case exprnode:
+	case exprnode:
 		cout << tabs << "expr\t" << endl;
-		for(int i = 0;i < root.children.size();i++){
+		for (int i = 0; i < root.children.size(); i++)
+		{
 			printtree(root.children[i], count + 1);
 		}
 		break;
-		case strnode:
+	case strnode:
 		cout << tabs << "str\t" << root.str << endl;
 		break;
-		case symnode:
+	case symnode:
 		cout << tabs << "sym\t" << root.sym << endl;
 		break;
-		case numnode:
+	case numnode:
 		cout << tabs << "num\t" << root.num << endl;
 		break;
-		case namenode:
+	case namenode:
 		cout << tabs << "name\t" << root.name << endl;
 		break;
 	}
@@ -122,9 +128,11 @@ int main(int argc, char *argv[])
 	try
 	{
 		tokens = divide(srccode);
-		cout << endl << endl;
+		cout << endl
+			 << endl;
 		printtokens(tokens);
-		cout << endl << endl;
+		cout << endl
+			 << endl;
 	}
 	catch (exception &e)
 	{
